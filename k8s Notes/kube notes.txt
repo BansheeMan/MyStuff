@@ -1,0 +1,2 @@
+Переключение конфигов
+export KUBECONFIG=inventory/mycluster/artifacts/admin.conf

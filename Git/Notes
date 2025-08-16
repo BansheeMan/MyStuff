@@ -1,0 +1,26 @@
+#Pre-setup:
+git config --global user.name "Banshee"
+git config --global user.email "alklin01@gmail.com"
+git config -l
+
+#Create local repository
+git init .
+
+#Add stage and commit
+git add . / git add * // git add blabla.txt
+git commit -m "Message"
+
+#Status and difference
+git status
+git diff (not add index)
+git diff --cached / git diff --staged (add index)
+git diff HEAD (all)
+git diff path/to/file.txt (current file)
+git diff --stat (with file names and short status)
+
+#Cancel change
+git restore . --staged (if was add)
+git restore file.txt // git checkout -- file.txt (if not was add)
+
+#History
+git log / git log -1 / git log -1 -p

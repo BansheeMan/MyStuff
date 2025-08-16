@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "cms"
+      POSTGRES_USER: "banshee"
+      POSTGRES_PASSWORD: "banshee123"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banshee -d cms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_DB_HOST: "db"
+      DJANGO_DB_NAME: "cms"
+      DJANGO_DB_USER: "banshee"
+      DJANGO_DB_PASSWORD: "banshee123"
+    volumes:
+      - ./myproject:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  postgres-data:
