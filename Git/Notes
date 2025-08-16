@@ -25,9 +25,19 @@ git restore file.txt // git checkout -- file.txt (if not was add)
 #History
 git log / git log -1 / git log -1 -p
 
+#Remote repository
+git remote add origin https://github.com/username/TestGit.git
+git remote -v
+git branch -M main
+git push -u origin main
+git push
+git pull
+git fetch
+
+
 #How to connect local and remote repositories
-# 1.Create New Reposiory in your account GitHub with name Local Repo
-# 2.git remote add origin https://github.com/username/TestGit.git
-# 3.git remote -v (check)
-# 4.git branch -M main (rename master)
-# 5.git push -u origin main (link main branches)
+1.Create New Reposiory in your account GitHub with name Local Repo
+2.git remote add origin https://github.com/username/TestGit.git
+3.git remote -v (check)
+4.git branch -M main (rename master)
+5.git push -u origin main (link main branches)
