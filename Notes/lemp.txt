@@ -1,0 +1,62 @@
+NGINX / MYSQL / PHP - Конспект
+
+=====================
+Nginx
+=====================
+
+Конфиги:
+- /etc/nginx/
+  - nginx.conf — основной конфиг
+  - sites-enabled — включенные сайты
+  - sites-available — доступные сайты
+  - /var/www/html/... — индекс (основная страница сайта)
+
+Команды:
+- nginx -t — проверить конфиг на ошибки
+- nginx -s reload — применить изменения без перезапуска
+
+=====================
+MySQL
+=====================
+
+Установка:
+    sudo apt install -y mysql-server
+
+Проверка статуса:
+    sudo systemctl --type=service | grep mysql
+
+Первичная настройка (безопасность):
+    sudo mysql_secure_installation
+
+Проверка способа авторизации:
+    SELECT user, plugin FROM mysql.user;
+(если стоит auth_socket, значит вход через системного пользователя)
+
+Изменение метода авторизации для root:
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+
+Подключение:
+    mysql -u root -p
+
+=====================
+PHP
+=====================
+
+Основные пакеты:
+- php-fpm — связка PHP с Nginx
+- php-mysql — взаимодействие с MySQL
+- PHP нужен, чтобы выполнять запросы к БД
+
+Сокет — метод коммуникации между приложениями (например, php-fpm создаёт сокет в /var/run/php/).
+
+Пример настройки сайта:
+    sudo vim /etc/nginx/sites-available/test
+    sudo ln -s /etc/nginx/sites-available/test /etc/nginx/sites-enabled/test
+    sudo nginx -t && sudo systemctl reload nginx
+
+Создание директории для сайта:
+    sudo mkdir -p /var/www/test
+(туда кладём файлы сайта и даём права пользователю www-data)
+
+Файл hosts (локальное тестирование):
+    sudo nano /etc/hosts
