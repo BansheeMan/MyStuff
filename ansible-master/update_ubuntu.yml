@@ -1,0 +1,40 @@
+---
+- name: "Обновление Ubuntu-серверов"
+  hosts: "kubespray_cluster"
+  become: true
+  tasks:
+    - name: "Обновление кеша пакетов APT"
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      register: "apt_update_result" # register сохраняет результат.
+      retries: 3 # retries + delay = повторит до 5 раз с задержкой.
+      delay: 10 #
+      until: "apt_update_result is succeeded" # until: <result> is succeeded — будет повторять, пока задача не выполнится успешно.
+      ignore_errors: false # ignore_errors: false — если и после 5 попыток фейл, то упадёт (можно заменить на true, если хочешь идти дальше по плейбуку).
+
+    - name: Показать результат apt update
+      debug:
+        var: apt_update_result
+
+    - name: "Установка всех доступных обновлений"
+      apt:
+        upgrade: "dist"
+        dpkg_options: "force-confdef,force-confold"
+        autoremove: yes
+      register: "apt_upgrade_result"
+      retries: 3
+      delay: 10
+      until: "apt_upgrade_result is succeeded"
+      ignore_errors: false
+
+    - name: "Проверка, требуется ли перезагрузка"
+      register: "reboot_required_file"
+      stat:
+        path: "/var/run/reboot-required"
+
+    - name: "Перезагрузка сервера, если требуется"
+      reboot:
+        msg: "Перезагрузка после установки обновлений"
+        pre_reboot_delay: 10
+      when: "reboot_required_file.stat.exists"

@@ -1,0 +1,21 @@
+---
+- name: "Add multiple host mappings to /etc/hosts"
+  hosts: "kubeadm_cluster"
+  become: true
+  vars:
+    host_entries:
+      - { name: kubeadm-master-1, ip: 192.168.100.58 }
+      - { name: kubeadm-master-2, ip: 192.168.100.59 }
+      - { name: kubeadm-master-3, ip: 192.168.100.60 }
+      - { name: kubeadm-worker-1, ip: 192.168.100.61 }
+      - { name: kubeadm-worker-2, ip: 192.168.100.62 }
+
+  tasks:
+    - name: "Add host mappings block"
+      ansible.builtin.blockinfile:
+        path: "/etc/hosts"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK kubeadm-cluster"
+        block: |
+          {% for item in host_entries %}
+          {{ item.ip }} {{ item.name }}
+          {% endfor %}

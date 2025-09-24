@@ -1,0 +1,35 @@
+ansible-playbook playbook.yml -i hosts
+ansible-playbook playbook.yml --start-at-task Installing php fpm and php mysql
+ansible-playbook -i inventory.ini playbook.yml -l server1
+ansible-playbook playbook.yml --limit "192.168.1.100"
+ansible-playbook playbook.yml --limit "имя_хоста"
+
+ansible all -m ping
+ansible all -m setup
+ansible all --list-host
+ansible-inventory --list
+ansible-inventory --graph
+ansible all --list-hosts -i hosts
+ansible  --list-hosts -i hosts -vvv   # -v  -vv -vvv VERBOSE
+
+ansible-doc -l                                                           # show list of module
+ansible-galaxy collection install community.mysql
+
+ansible kubeadm-worker-2 -a "kill 2712"
+ansible kubeadm-master-2 --become -a "kill 14957"
+ansible all -m command -a "kill 14957"
+ansible kubespray_cluster --become -a 'sh -c "apt update && apt install -y python3 python3-pip"'
+ansible kubeadm-master-2 --become -m shell -a "echo $USER > /tmp/user.txt && date"
+
+ansible all -m copy -a "src=bla.txt dest=/home mode=777" -b                  # create file
+ansible all -m file -a "path=/home/bla.txt state=absent" -b                  # remove file
+ansible all -m get_url -a "url=https://www.google.com/bla.txt dest=/home"    # download file
+ansible all -m yum -a "name=nginx state=latest" -b                           # apt install
+ansible all -m uri -a "url=https://www.google.com"                           # check connect to url
+ansible all -m uri -a "url=https://www.google.com return_content=yes"        # check connect to url and return content
+
+
+
+### DELETE ANSIBLE CORE
+sudo apt remove --purge ansible ansible-core -y
+sudo apt autoremove --purge -y

@@ -1,0 +1,15 @@
+---
+- name: "Edit files hostname and hosts from inventory"
+  hosts: "kubespray_cluster"
+  become: true
+
+  tasks:
+    - name: "Edit hostname"
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: "Edit hosts"
+      ansible.builtin.replace:
+        path: /etc/hosts
+        regexp: '^(127\.0\.1\.1\s+)ubuntu'
+        replace: '\1{{ ansible_hostname }}'

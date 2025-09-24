@@ -1,0 +1,10 @@
+---
+- name: Remove Kubernetes hosts block from /etc/hosts
+  hosts: kubeadm_cluster
+  become: true
+  tasks:
+    - name: Delete ANSIBLE MANAGED BLOCK kubeadm-cluster from /etc/hosts
+      ansible.builtin.blockinfile:
+        path: /etc/hosts
+        state: absent
+        marker: "# {mark} ANSIBLE MANAGED BLOCK kubeadm-cluster"
