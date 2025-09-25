@@ -1,6 +1,6 @@
 ---
 - name: Remove Kubernetes hosts block from /etc/hosts
-  hosts: kubeadm_cluster
+  hosts: kubeadm
   become: true
   tasks:
     - name: Delete ANSIBLE MANAGED BLOCK kubeadm-cluster from /etc/hosts

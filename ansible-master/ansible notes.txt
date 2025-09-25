@@ -3,9 +3,10 @@ ansible-playbook playbook.yml --start-at-task Installing php fpm and php mysql
 ansible-playbook -i inventory.ini playbook.yml -l server1
 ansible-playbook playbook.yml --limit "192.168.1.100"
 ansible-playbook playbook.yml --limit "имя_хоста"
+ansible-playbook remove_entries_hosts.yml -i hosts.ini -C   # -C / check mode — режим проверки, только симуляция действий
 
 ansible all -m ping
-ansible all -m setup
+ansible all -m setup           #собирает факты (facts) о системе.
 ansible all --list-host
 ansible-inventory --list
 ansible-inventory --graph

@@ -1,0 +1,21 @@
+iptables -t nat -A PREROUTING -p tcp --dport 30022 -d 10.48.68.83 -j DNAT --to-destination 192.168.100.53:22
+
+если не стартанет то дописать
+iptables -t nat -A POSTROUTING -p tcp -d 192.168.100.53 --dport 22 -j MASQUERADE
+
+sudo nano /etc/sysctl.conf
+net.ipv4.ip_forward=1
+
+NAT, в терминологии линукс DNAT
+или просто проброс портов (port forwarding)
+
+Сохраните правила iptables
+Для сохранения правил выполните:
+
+iptables-save > /etc/iptables/rules.v4
+
+Или, если используется
+iptables-persistent, сохраните изменения:
+
+netfilter-persistent save
+netfilter-persistent reload

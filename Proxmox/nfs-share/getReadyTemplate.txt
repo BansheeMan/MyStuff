@@ -1,0 +1,38 @@
+sudo visudo
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin ALL=(ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+banshee ALL=(ALL) NOPASSWD: ALL
+------------------------------------------
+sudo apt update && sudo apt dist-upgrade -y
+-------------------------------------------
+sudo rm /etc/ssh/ssh_host_*
+------------------------------------------
+cat /etc/machine-id
+sudo truncate -s 0 /etc/machine-id
+cat /var/lib/dbus/machine-id
+------------------------------------------
+sudo apt clean
+sudo apt autoremove
+sudo poweroff
+------------------------------------------
+sudo apt install --reinstall openssh-server
+sudo dpkg-reconfigure openssh-server
+------------------------------------------
+sudo nano /etc/hosts
+sudo nano /etc/hostname
+------------------------------------------
+ssh -i ~/.ssh/id_rsa_banshee banshee@192.168.100.50 -p 1307
+
+sudo scp -P 1307 /home/banshee/id_rsa_banshee.pub banshee@192.168.100.50:/home/banshee/ -  ЗАГРУЗИТЬ
+sudo scp -P 1307 root@192.168.100.50:/home/banshee/файл.txt /home/banshee/ - СКАЧАТЬ
+
+scp -r lemp-1:/var/www/html/ /home/banshee/ - СКАЧАТЬ (-r - рекурсивно дир. с содерж.)
+
+sudo SCP_SSH_OPTS="-F ~/.ssh/config" scp lemp-1:/var/www/html/ /home/banshee/ (УКАЗ. КОНФИГ ЯВНО)
+---------------------------------------------------------------------------------------------------

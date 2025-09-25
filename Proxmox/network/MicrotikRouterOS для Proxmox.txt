@@ -1,0 +1,48 @@
+Это в шел прокса
+bash -c "$(wget -qLO - https://github.com/community-scripts/ProxmoxVE/raw/main/vm/mikrotik-routeros.sh)"
+--------
+На созданной виртуалке, чтобы узнать ip для winbox
+ip dhcp-client print 
+--------
+В консоль vm микротика, когда подключился по winbox
+--------
+Также конфиг
+
+/interface bridge
+add name=bridge-lan
+/interface ethernet
+set [ find default-name=ether1 ] disable-running-check=no
+set [ find default-name=ether2 ] disable-running-check=no name=ether3
+/ip pool
+add name=pool-dhcp ranges=192.168.249.10-192.168.249.100
+/ip dhcp-server
+add address-pool=pool-dhcp interface=bridge-lan name=server-dhcp
+/interface bridge port
+add bridge=bridge-lan interface=ether3
+/interface ovpn-server server
+add mac-address=FE:17:3D:47:84:8A name=ovpn-server1
+/ip address
+add address=192.168.249.1/24 interface=ether3 network=192.168.249.0
+/ip dhcp-client
+add interface=ether1
+/ip dhcp-server network
+add address=192.168.249.1/32 dns-server=10.48.66.176 gateway=192.168.249.1 \
+    netmask=24
+/ip dns
+set allow-remote-requests=yes
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1
+/ip ipsec profile
+set [ find default=yes ] dpd-interval=2m dpd-maximum-failures=5
+/system note
+set show-at-login=no
+/system ntp client
+set enabled=yes
+/system ntp server
+set enabled=yes
+/system ntp client servers
+add address=pool.ntp.org
+
+------
+Прописать маршрут на самой VM 
+sudo ip route add default via 192.168.249.1 dev ens18 proto static
