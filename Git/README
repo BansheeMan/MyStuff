@@ -9,6 +9,7 @@ git init .
 #Add stage and commit
 git add . / git add * // git add blabla.txt
 git commit -m "Message"
+git commit -a -m "TestGit"     //Auto add index . and commit
 
 #Status and difference
 git status
