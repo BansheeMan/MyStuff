@@ -42,3 +42,30 @@ git fetch
 3.git remote -v (check)
 4.git branch -M main (rename master)
 5.git push -u origin main (link main branches)
+
+
+#########
+
+git checkout branch-name Переключение веток
+
+git checkout -b new-branch Создание новой ветки и переход
+
+git checkout -- filename Восстановление файлов (до состояния последнего коммита):
+
+git branch   Выведет список всех локальных веток.
+              У текущей ветки будет звёздочка *:
+
+
+git branch -a  Если хочешь увидеть и локальные, и удалённые ветки
+
+
+git fetch origin                    # подтягиваешь последние изменения с сервера
+git merge origin/main               # сливаешь main в свою ветку
+
+
+git switch -c feature/my-task
+-c (create) — создать ветку и сразу переключиться.
+
+git add -A
+
+git rebase main = подтянуть изменения из main и наложить свои коммиты поверх, переписав историю своей ветки.
