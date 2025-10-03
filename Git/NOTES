@@ -1,0 +1,57 @@
+git#Pre-setup:
+git config --global user.name "Banshee"
+git config --global user.email "alklin01@gmail.com"
+git config -l
+
+#Create local repository
+git init .
+
+#Add stage and commit
+git add -A // git add . / git add * // git add blabla.txt
+git commit -m "Message"
+git commit -a -m "TestGit"     //Auto add index . and commit
+
+#Status and difference
+git status
+git diff (not add index)
+git diff --cached / git diff --staged (add index)
+git diff HEAD (all)
+git diff path/to/file.txt (current file)
+git diff --stat (with file names and short status)
+
+#Cancel change
+git restore . --staged (if was add)
+git restore file.txt // git checkout -- file.txt (if not was add)
+
+#History
+git log / git log -1 / git log -1 -p
+
+#Branch
+git checkout branch-name        // переключение веток
+git checkout -b new-branch      // cоздание новой ветки и переход
+git checkout -- filename        // восстановление файлов (до состояния последнего коммита):
+git branch                      // выведет список всех локальных веток, у текущей ветки будет звёздочка *:
+git branch -a                   // tсли хочешь увидеть и локальные, и удалённые ветки
+git switch -c feature/my-task   // -c (create) — создать ветку и сразу переключиться.
+
+#Remote repository
+git remote add origin https://github.com/username/TestGit.git
+git remote -v
+git branch -M main
+git push -u origin main
+git fetch origin             // подтягиваешь последние изменения с сервера
+git merge origin/main        // сливаешь main в свою ветку
+git rebase main              // подтянуть изменения из main и наложить свои коммиты поверх, переписав историю своей ветки.
+git push
+git pull
+git fetch
+
+
+#How to connect local and remote repositories
+1. Create New Reposiory in your account GitHub with name Local Repo
+2. git remote add origin https://github.com/username/TestGit.git
+3. git remote -v (check)
+4. git branch -M main (rename master)
+5. git push -u origin main (link main branches)
+
+#########
