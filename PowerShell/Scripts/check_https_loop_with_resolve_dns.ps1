@@ -58,35 +58,57 @@ try {
     Write-Host "The Ctrl+C handler is unavailable (ISE/VSCode). You can stop it manually." -ForegroundColor DarkYellow
 }
 
+try {
+    Write-Host "Resolving DNS for $uri..." -ForegroundColor Cyan
+    $hostname = ([System.Uri]$uri).Host
+    $dnsAddresses = [System.Net.Dns]::GetHostAddresses($hostname) | Where-Object { $_.AddressFamily -eq 'InterNetwork' }
+
+    if ($dnsAddresses.Count -eq 0) {
+        throw "DNS returned no IPv4 addresses"
+    }
+
+    Write-Host "Resolved addresses:" -ForegroundColor Cyan
+    $dnsAddresses | ForEach-Object { Write-Host " - $_" }
+}
+catch {
+    Write-Host "DNS resolution failed: $($_.Exception.Message)" -ForegroundColor Red
+    exit
+}
+
 while (-not $global:stopRequested) {
-    $timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    foreach ($ip in $dnsAddresses) {
 
-    try {
-        $uriObj = [Uri]$uri
-        $resolvedIPs = (Resolve-DnsName -Name $uriObj.Host -ErrorAction Stop | Where-Object {$_.QueryType -eq "A"}).IPAddress
-        $dnsInfo = if ($resolvedIPs) { $resolvedIPs -join ", " } else { "DNS not resolved" }
+        $timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 
-        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $response = Invoke-WebRequest -Uri $uriObj -Headers $headers -UseBasicParsing
-        $stopwatch.Stop()
+        $ipUri = $uri -replace $hostname, $ip.IPAddressToString
 
-        $elapsedSeconds = [math]::Round($stopwatch.Elapsed.TotalSeconds, 2)
-        $size = $response.RawContentLength
+        $reqHeaders = $headers.Clone()
+        $reqHeaders["Host"] = $hostname
 
-        $logLine = "$timestamp OK: Status=$($response.StatusCode); Time=${elapsedSeconds}s; Size=${size}b; DNS=$dnsInfo"
-        Write-Host $logLine -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $logLine
+        try {
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            $response = Invoke-WebRequest -Uri $ipUri -Headers $reqHeaders -UseBasicParsing
+            $stopwatch.Stop()
+
+            $elapsedSeconds = [math]::Round($stopwatch.Elapsed.TotalSeconds, 2)
+            $size = $response.RawContentLength
+
+            $logLine = "$timestamp OK: IP=$ip; Status=$($response.StatusCode); Time=${elapsedSeconds}s; Size=${size}b"
+            Write-Host $logLine -ForegroundColor Green
+            Add-Content -Path $LogFile -Value $logLine
+        }
+        catch {
+            $stopwatch.Stop()
+            $elapsedSeconds = [math]::Round($stopwatch.Elapsed.TotalSeconds, 2)
+            $errorMsg = $_.Exception.Message
+
+            $logLine = "$timestamp ERROR: IP=$ip; $errorMsg (Time=${elapsedSeconds}s)"
+            Write-Host $logLine -ForegroundColor Red
+            Add-Content -Path $LogFile -Value $logLine
+        }
+
+        Start-Sleep -Seconds $IntervalSeconds
     }
-    catch {
-        $stopwatch.Stop()
-        $elapsedSeconds = [math]::Round($stopwatch.Elapsed.TotalSeconds, 2)
-        $errorMsg = $_.Exception.Message
-        $logLine = "$timestamp ERROR: $errorMsg (Time=${elapsedSeconds}s); DNS=$dnsInfo"
-        Write-Host $logLine -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $logLine
-    }
-
-    Start-Sleep -Seconds $IntervalSeconds
 }
 
 Write-Host "`n==============================="
