@@ -1,7 +1,7 @@
 # LAMP PLAYBOOK
 ---
 - name: "Install components for LEMP-host"
-  hosts: "lemp_ansible"
+  hosts: "lemp"
   become: true
   tasks:
     # NGINX

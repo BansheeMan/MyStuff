@@ -1,0 +1,41 @@
+- name: Мой супер-пупер плейбук
+  hosts: lemp
+  become: true
+
+  vars:
+    month_one: 'hello'
+    month_two: 'world'
+    secret: 'my_secret_password'
+
+  tasks:
+    - name: Вывести секретную переменную
+      debug:
+        var: secret
+
+    - name: Вывести секретное слово с сообщением
+      debug:
+        msg: "Секретное слово: {{ secret }}"
+
+    - name: Вывести владельца сервера
+      debug:
+        msg: "Владелец этого сервера: {{ owner }}"
+
+    - name: Объединить две переменные в одну
+      set_fact:
+        full_month: "{{ month_one }} {{ month_two }}"
+
+    - name: Показать новую переменную
+      debug:
+        var: full_month
+
+    - name: Показать дистрибутив Linux на сервере
+      debug:
+        var: ansible_distribution
+
+    - name: Запустить команду и сохранить результат
+      shell: uptime
+      register: result
+
+    - name: Показать результат команды
+      debug:
+        var: result.stdout

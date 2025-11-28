@@ -1,21 +1,22 @@
-ansible-playbook playbook.yml -i hosts
-ansible-playbook playbook.yml --start-at-task Installing php fpm and php mysql
-ansible-playbook -i inventory.ini playbook.yml -l server1
-ansible-playbook playbook.yml --limit "192.168.1.100"
-ansible-playbook playbook.yml --limit "имя_хоста"
-ansible-playbook remove_entries_hosts.yml -i hosts.ini -C   # -C / check mode — режим проверки, только симуляция действий
-
-ansible all -m ping    # or win_ping
-ansible all -m setup           #собирает факты (facts) о системе.
+ansible all -m ping
+ansible all -m setup
 ansible all --list-host
 ansible-inventory --list
 ansible-inventory --graph
 ansible all --list-hosts -i hosts
 ansible  --list-hosts -i hosts -vvv   # -v  -vv -vvv VERBOSE
 
+ansible-playbook playbook.yml -i hosts
+ansible-playbook playbook.yml --start-at-task Installing php fpm and php mysql
+ansible-playbook -i inventory.ini playbook.yml -l server1
+ansible-playbook playbook.yml --limit "192.168.1.100"
+ansible-playbook playbook.yml --limit "имя_хоста"
+
 ansible-doc -l                                                           # show list of module
 ansible-galaxy collection install community.mysql
 
+ansible lemp -m shell -a "uptime"                                       # show uptime throw SHELL
+ansible lemp -m command -a "uptime"                                     # show uptime throw COMMAND
 ansible kubeadm-worker-2 -a "kill 2712"
 ansible kubeadm-master-2 --become -a "kill 14957"
 ansible all -m command -a "kill 14957"

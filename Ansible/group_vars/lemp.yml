@@ -1,0 +1,3 @@
+---
+ansible_port          : 1307
+ansible_user          : banshee

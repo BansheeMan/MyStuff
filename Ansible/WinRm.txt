@@ -1,0 +1,11 @@
+# 1. Запустить WinRM с настройками по умолчанию (открывает порт 5985 в брандмауэре)
+winrm quickconfig -q
+
+# 2. Убедиться, что порт 5985 открыт в брандмауэре
+Get-NetFirewallRule -Name "WINRM-HTTP-In-TCP-PUBLIC" | Select-Object Name, Enabled
+
+# 3. Разрешить использование простых (базовых) методов аутентификации для WinRM
+Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true 
+
+# 4. Разрешить передачу незашифрованных данных (необходимо для HTTP-подключения)
+Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true

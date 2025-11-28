@@ -1,0 +1,30 @@
+---
+- name: Деплой простого сайта на Apache
+  hosts: lemp
+  become: yes
+
+  vars:
+    source_file: files/index.html
+    destination: /var/www/html/index.html
+
+  tasks:
+    - name: Установить httpd
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+
+    - name: Скопировать файл сайта
+      ansible.builtin.copy:
+        src: "{{ source_file }}"
+        dest: "{{ destination }}"
+        owner: apache                           #chown
+        group: apache
+        mode: '0644'
+      notify: Перезапустить httpd
+
+  handlers:
+    - name: Перезапустить httpd
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+

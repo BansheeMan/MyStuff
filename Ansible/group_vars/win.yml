@@ -1,0 +1,11 @@
+# Говорим Ansible использовать протокол WinRM
+ansible_connection                   : winrm
+# Имя пользователя Windows (вы, судя по скриншоту, используете Administrator)
+ansible_user                         : Administrator 
+# Пароль пользователя Windows
+ansible_password                     : Henjdsq123
+# Используем HTTP (порт 5985). Этот протокол проще настроить для быстрого теста.
+ansible_winrm_scheme                 : http 
+ansible_port : 5985
+# Игнорируем проверку сертификата. Это необходимо, если WinRM настроен на HTTPS с самоподписанным сертификатом или для HTTP-подключения.
+ansible_winrm_server_cert_validation : ignore
