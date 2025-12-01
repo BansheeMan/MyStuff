@@ -3,9 +3,9 @@
   become: true
 
   vars:
-    month_one: 'hello'
-    month_two: 'world'
-    secret: 'my_secret_password'
+    month_one: "hello"
+    month_two: "world"
+    secret: "my_secret_password"
 
   tasks:
     - name: Вывести секретную переменную

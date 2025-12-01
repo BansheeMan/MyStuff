@@ -30,8 +30,54 @@ ansible all -m yum -a "name=nginx state=latest" -b                           # a
 ansible all -m uri -a "url=https://www.google.com"                           # check connect to url
 ansible all -m uri -a "url=https://www.google.com return_content=yes"        # check connect to url and return content
 
+##################   DEBUG    #########################
+
+tasks:
+  - name: Install packages
+    yum:
+      name: httpd
+      state: present
+    tags: install
+
+  - name: Start service
+    service:
+      name: httpd
+      state: started
+    tags: start
+
+     tasks:
+    - name: Вывести секретную переменную
+      debug:
+        var: secret
+
+    - name: Вывести секретное слово с сообщением
+      debug:
+        msg: "Секретное слово: {{ secret }}"
+
+ansible-playbook site.yml --tags install                   # запускаешь только нужную задачу
+ansible-playbook site.yml --tags "install,start"           # несколько
+ansible-playbook site.yml --skip-tags start                # запустить всё кроме определённой задачи
+
+ansible-playbook site.yml --start-at-task="Install packages"    # запускает плейбук начиная С указанной задачи, НО НЕ ТОЛЬКО ЕЁ.
 
 
-### DELETE ANSIBLE CORE
+    - name: "DOTNET_VERSION"
+      ansible.builtin.debug:
+        msg: "{{ dotnet_version }} >> {{ dotnet_version | type_debug }}"
+      when: dotnet_version is defined
+
+    - name: "DOTNET_VERSIONSSSSS"
+      ansible.builtin.debug:
+        msg: "{{ dotnet_versions }} >> {{ dotnet_versions | type_debug }}"
+      when: dotnet_versions is defined
+
+    - name: "__DOTNET_VERSIONS"
+      ansible.builtin.debug:
+        msg: |
+          "{{ __dotnet_versions }} >> {{ __dotnet_versions | type_debug }}"
+          "{{ __dotnet_versions[0] }} >> {{ __dotnet_versions[0] | type_debug }}"
+
+
+################## DELETE ANSIBLE CORE #########################
 sudo apt remove --purge ansible ansible-core -y
 sudo apt autoremove --purge -y
