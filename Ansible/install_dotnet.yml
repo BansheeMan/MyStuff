@@ -1,0 +1,173 @@
+---
+
+- name: '.NET installation'
+  hosts: "{{ ansible_limit | default(omit) }}"
+  serial: '{{ serial_number | default(omit) }}'
+  gather_facts: false
+  vars:
+    default_dotnet_types:
+      - hosting
+      - runtime
+    default_dotnet_versions:
+      - 8
+      - 9
+      - 10
+      # - sdk
+    hosting_version: '{{ json_content.releases[0]["aspnetcore-runtime"].version }}'
+    runtime_version: '{{ json_content.releases[0].windowsdesktop.version }}'
+    sdk_version: '{{ json_content.releases[0].sdk.version }}'
+
+  tasks:
+    - name: "Limit safety catch"
+      ansible.builtin.fail:
+        msg: "You must use -l or --limit"
+      when: ansible_limit is not defined
+      run_once: true
+
+    - name: 'Define dotnet types'
+      ansible.builtin.set_fact:
+        __dotnet_types: '{{ dotnet_types | default(default_dotnet_types) }}'
+
+    - name: "End the play if no components are to install"
+      ansible.builtin.meta: end_host
+      when:
+        - __dotnet_types == 'none' or (__dotnet_types | length == 0)
+
+    - name: 'Set default .NET versions'
+      ansible.builtin.set_fact:
+        __dotnet_versions: "{{ default_dotnet_versions }}"
+
+    - name: 'Override versions from dotnet_versions list'
+      ansible.builtin.set_fact:
+        __dotnet_versions: "{{ dotnet_versions }}"
+      when: dotnet_versions is defined
+
+    - name: 'Override versions from dotnet_version single value'
+      ansible.builtin.set_fact:
+        __dotnet_versions:
+          - "{{ dotnet_version }}"
+      when: dotnet_version is defined
+
+    - name: 'Normalize .NET versions list'
+      ansible.builtin.set_fact:
+        __dotnet_versions: "{{ __dotnet_versions | map('string') | list | unique }}"
+
+    - name: 'Fail if no versions to install'
+      ansible.builtin.fail:
+        msg: "No .NET versions to install: dotnet_version is not set and dotnet_versions is empty"
+      when: __dotnet_versions | length == 0
+      run_once: true
+
+    - name: "Install .NET {{ dotnet_major }}"
+      vars:
+        dotnet_major: "{{ item }}"
+      loop: "{{ __dotnet_versions }}"
+      loop_control:
+        label: "{{ dotnet_major }}"
+      block:
+        - name: Getting links and hash sums for .NET {{ dotnet_major }}
+          run_once: true
+          block:
+            - name: Download JSON file
+              ansible.windows.win_uri:
+                url: "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/{{ dotnet_major }}.0/releases.json"
+                method: GET
+                return_content: true
+              register: json_response
+
+            - name: Convert JSON content
+              ansible.builtin.set_fact:
+                json_content: '{{ json_response.content | from_json }}'
+
+            - name: Extract file information (hosting, sdk, runtime)
+              ansible.builtin.set_fact:
+                hosting_target: >-
+                  {{ json_content.releases[0]['aspnetcore-runtime'].files
+                  | selectattr('name', 'equalto', 'dotnet-hosting-win.exe')
+                  | list | first }}
+                runtime_target: >-
+                  {{ json_content.releases[0].windowsdesktop.files
+                  | selectattr('name', 'equalto', 'windowsdesktop-runtime-win-x64.exe')
+                  | list | first }}
+                sdk_target: >-
+                  {{ json_content.releases[0].sdk.files
+                  | selectattr('name', 'equalto', 'dotnet-sdk-win-x64.exe')
+                  | list | first }}
+
+        - name: Check if installed Windows Server Hosting {{ hosting_version }}
+          when: '"hosting" in __dotnet_types'
+          ansible.windows.win_shell: |
+            Get-ItemProperty HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
+            Where-Object { $_.DisplayName -eq 'Microsoft .NET {{ hosting_version }} - Windows Server Hosting' } | Select-Object DisplayName
+          register: product_id_hosting
+          changed_when: false
+
+        - name: Microsoft .NET Windows Server Hosting {{ hosting_version }}
+          when: (product_id_hosting.stdout is defined) and (product_id_hosting.stdout | trim == '') and ("hosting" in __dotnet_types)
+          block:
+            - name: Download Microsoft .NET Windows Server Hosting version {{ hosting_version }}
+              ansible.builtin.include_role:
+                name: package_download
+              vars:
+                man_package_download_url: '{{ hosting_target.url }}'
+                opt_package_download_args:
+                  checksum: '{{ hosting_target.hash }}'
+                  checksum_algorithm: sha512
+
+            - name: Install Microsoft .NET Windows Server Hosting {{ hosting_version }}
+              ansible.windows.win_package:
+                path: '{{ out_package_download_result.path }}'
+                product_id: '{{ product_id_hosting.stdout }}'
+                arguments: '/install /quiet /norestart'
+
+        - name: Check if installed Microsoft Windows Desktop Runtime {{ runtime_version }}
+          when: '"runtime" in __dotnet_types'
+          ansible.windows.win_shell: |
+            Get-ItemProperty HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
+            Where-Object { $_.DisplayName -eq 'Microsoft Windows Desktop Runtime - {{ runtime_version }} (x64)' } | Select-Object DisplayName
+          register: product_id_runtime
+          changed_when: false
+
+        - name: Microsoft Windows Desktop Runtime {{ runtime_version }}
+          when: (product_id_runtime.stdout is defined) and (product_id_runtime.stdout | trim == '') and ("runtime" in __dotnet_types)
+          block:
+            - name: Download Microsoft Windows Desktop Runtime - {{ runtime_version }}
+              ansible.builtin.include_role:
+                name: package_download
+              vars:
+                man_package_download_url: '{{ runtime_target.url }}'
+                opt_package_download_args:
+                  checksum: '{{ runtime_target.hash }}'
+                  checksum_algorithm: sha512
+
+            - name: Install Microsoft Windows Desktop Runtime {{ runtime_version }}
+              ansible.windows.win_package:
+                path: '{{ out_package_download_result.path }}'
+                product_id: '{{ product_id_runtime.stdout }}'
+                arguments: '/install /quiet /norestart'
+
+        - name: Check if installed Microsoft .NET SDK {{ sdk_version }}
+          when: '"sdk" in __dotnet_types'
+          ansible.windows.win_shell: |
+            Get-ItemProperty HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
+            Where-Object { $_.DisplayName -eq 'Microsoft .NET SDK {{ sdk_version }} (x64)' } | Select-Object DisplayName
+          register: product_id_sdk
+          changed_when: false
+
+        - name: Microsoft .NET SDK {{ sdk_version }}
+          when: (product_id_sdk.stdout is defined) and (product_id_sdk.stdout | trim == '') and ("sdk" in __dotnet_types)
+          block:
+            - name: Download Microsoft .NET SDK {{ sdk_version }}
+              ansible.builtin.include_role:
+                name: package_download
+              vars:
+                man_package_download_url: '{{ sdk_target.url }}'
+                opt_package_download_args:
+                  checksum: '{{ sdk_target.hash }}'
+                  checksum_algorithm: sha512
+
+            - name: Install Microsoft .NET SDK {{ sdk_version }}
+              ansible.windows.win_package:
+                path: '{{ out_package_download_result.path }}'
+                product_id: '{{ product_id_sdk.stdout }}'
+                arguments: '/install /quiet /norestart'
