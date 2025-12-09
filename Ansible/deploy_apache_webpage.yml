@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    source_file: files/index.html
+    source_file: ./files/index.html
     destination: /var/www/html/index.html
 
   tasks:
