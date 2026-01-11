@@ -1,10 +1,10 @@
-- name: Мой супер-пупер плейбук
+- name:  My Super Puper Playbook for Var Lesson 11
   hosts: lemp
   become: true
 
   vars:
-    month_one: "hello"
-    month_two: "world"
+    mes_one: "hello"
+    mes_two: "world"
     secret: "my_secret_password"
 
   tasks:
@@ -22,11 +22,11 @@
 
     - name: Объединить две переменные в одну
       set_fact:
-        full_month: "{{ month_one }} {{ month_two }}"
+        full_mes: "{{ mes_one }} {{ mes_two }} from {{ owner }}"
 
     - name: Показать новую переменную
       debug:
-        var: full_month
+        var: full_mes
 
     - name: Показать дистрибутив Linux на сервере
       debug:
