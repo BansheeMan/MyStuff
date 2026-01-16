@@ -1,3 +1,4 @@
 ---
+### для группы lemp (следует из названия файла)
 ansible_port          : 1307
 ansible_user          : banshee
