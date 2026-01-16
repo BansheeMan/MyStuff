@@ -1,7 +1,7 @@
 ansible all -m ping
 ansible all -m setup
 ansible all --list-host
-ansible-inventory --list
+ansible-inventory --list    # показывает все переменные у серверов
 ansible-inventory --graph
 ansible all --list-hosts -i hosts
 ansible  --list-hosts -i hosts -vvv   # -v  -vv -vvv VERBOSE
