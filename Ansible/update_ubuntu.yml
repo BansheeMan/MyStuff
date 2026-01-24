@@ -1,6 +1,6 @@
 ---
 - name: "Обновление Ubuntu-серверов"
-  hosts: "kubespray_cluster"
+  hosts: "lemp"
   become: true
   tasks:
     - name: "Обновление кеша пакетов APT"

@@ -1,5 +1,5 @@
 ---
-- name: Деплой простого сайта на Apache
+- name: Install Apache and Upload my Home Page
   hosts: lemp
   become: yes
 
@@ -8,23 +8,24 @@
     destination: /var/www/html/index.html
 
   tasks:
-    - name: Установить httpd
-      ansible.builtin.yum:
-        name: httpd
+    - name: Install Apache Web Server
+      ansible.builtin.apt:
+        name: apache2
         state: present
+        update_cache: true
+        cache_valid_time: 3600
 
-    - name: Скопировать файл сайта
+    - name: Copy HomePage file to Web Server
       ansible.builtin.copy:
         src: "{{ source_file }}"
         dest: "{{ destination }}"
-        owner: apache                           #chown
-        group: apache
+        owner: www-data
+        group: www-data
         mode: '0644'
-      notify: Перезапустить httpd
+      notify: Restart Apache
 
   handlers:
-    - name: Перезапустить httpd
+    - name: Restart Apache
       ansible.builtin.service:
-        name: httpd
+        name: apache2
         state: restarted
-
