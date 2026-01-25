@@ -19,8 +19,8 @@
       ansible.builtin.copy:
         src: "{{ source_file }}"
         dest: "{{ destination }}"
-        owner: www-data
-        group: www-data
+        owner: root
+        group: root
         mode: '0644'
       notify: Restart Apache
 

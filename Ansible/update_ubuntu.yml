@@ -3,6 +3,13 @@
   hosts: "lemp"
   become: true
   tasks:
+    - name: Fix interrupted dpkg if needed
+      ansible.builtin.command: dpkg --configure -a
+      become: true
+      register: dpkg_fix
+      changed_when: false
+      failed_when: false
+
     - name: "Обновление кеша пакетов APT"
       apt:
         update_cache: true
