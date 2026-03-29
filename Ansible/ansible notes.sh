@@ -1,3 +1,5 @@
+ansible-playbook playbooks/install_dotnet.yml -i inventories/hosts.yml -l test-1 --extra-vars "dotnet_types=sdk dotnet_version=9"
+
 ansible all -m ping
 ansible all -m setup
 ansible all --list-host
